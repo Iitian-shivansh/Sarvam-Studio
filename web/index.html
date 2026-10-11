@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sarvam AI Podcast Studio — Multi-Speaker Audio Generator</title>
+  <meta name="description" content="Generate production-ready multi-speaker podcast episodes from topics or documents using Sarvam AI's Indic models.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Navigation Header -->
+    <header class="studio-header">
+      <div class="header-brand">
+        <div class="brand-logo-icon">
+          <span class="wave-bar"></span>
+          <span class="wave-bar"></span>
+          <span class="wave-bar"></span>
+          <span class="wave-bar"></span>
+          <span class="wave-bar"></span>
+        </div>
+        <div>
+          <h1 class="brand-title">Sarvam Studio</h1>
+          <p class="brand-subtitle">AI Podcast Generator • Multi-Speaker & BGM</p>
+        </div>
+      </div>
+
+      <div class="header-meta">
+        <div class="badge status-badge" id="apiStatusBadge">
+          <span class="status-dot pulse"></span>
+          <span>Sarvam-105B & Bulbul v3 Ready</span>
+        </div>
+        <button class="btn btn-secondary btn-sm" id="btnLibraryToggle">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          Episode Library (<span id="episodesCount">0</span>)
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Studio Workspace Grid -->
+    <main class="studio-workspace">
+      <!-- Left Column: Controls & Configuration -->
+      <section class="studio-panel panel-controls">
+        <div class="panel-header">
+          <h2 class="panel-title">Production Controls</h2>
+          <span class="panel-pill">Step 1 & 2</span>
+        </div>
+
+        <form id="podcastForm" class="controls-form">
+          <!-- Input Mode Switcher Tabs -->
+          <div class="tab-group" role="tablist">
+            <button type="button" class="tab-btn active" id="tabTopicBtn" data-target="topicMode">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              Topic / Prompt
+            </button>
+            <button type="button" class="tab-btn" id="tabDocBtn" data-target="docMode">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              Upload Document (PDF/TXT)
+            </button>
+          </div>
+
+          <!-- Topic Mode Input -->
+          <div id="topicMode" class="mode-section active">
+            <div class="form-group">
+              <label for="topicInput" class="form-label">Episode Topic or Question</label>
+              <textarea id="topicInput" name="topic" rows="3" class="form-textarea" placeholder="e.g. The Rise of Quick Commerce in India: Convenience vs Profitability" required>Why Indian Tech Startups are Booming</textarea>
+            </div>
+
+            <!-- Quick Inspiration Chips -->
+            <div class="chips-container">
+              <span class="chips-label">Inspirations:</span>
+              <button type="button" class="chip-btn" data-topic="The Rise of Quick Commerce in India: 10-Minute Delivery Economics">Quick Commerce</button>
+              <button type="button" class="chip-btn" data-topic="AI Revolution in Indian Healthcare & Diagnostics">AI Healthcare</button>
+              <button type="button" class="chip-btn" data-topic="How UPI Changed Digital Payments Worldwide">UPI & Fintech</button>
+              <button type="button" class="chip-btn" data-topic="Electric Vehicles in India: Charging Infrastructure & 2-Wheelers">EVs in India</button>
+            </div>
+          </div>
+
+          <!-- Document Mode Input -->
+          <div id="docMode" class="mode-section">
+            <div class="form-group">
+              <label class="form-label">Upload Research Document</label>
+              <div class="dropzone" id="fileDropzone">
+                <input type="file" id="docFileInput" name="file" accept=".pdf,.txt,.md" class="file-input-hidden">
+                <div class="dropzone-content">
+                  <svg class="dropzone-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                  <p class="dropzone-title" id="dropzoneText">Drag & drop your PDF or TXT report here</p>
+                  <p class="dropzone-hint">Supports research papers, company memos, notes (.pdf, .txt, .md)</p>
+                  <button type="button" class="btn btn-secondary btn-sm" id="btnBrowseFile">Browse File</button>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="docTopicHint" class="form-label">Episode Focus / Discussion Angle (Optional)</label>
+              <input type="text" id="docTopicHint" class="form-input" placeholder="e.g. Focus on financial risks and customer impact">
+            </div>
+          </div>
+
+          <!-- Host Customization Section -->
+          <div class="form-section-title">
+            <span>🎙️ Co-Hosts & Voices</span>
+          </div>
+
+          <div class="hosts-grid">
+            <!-- Host 1 -->
+            <div class="host-card">
+              <div class="host-card-header">
+                <span class="host-avatar host-1-avatar">H1</span>
+                <div>
+                  <label class="host-card-label" for="host1Name">Host 1 (Lead)</label>
+                  <input type="text" id="host1Name" name="host_1_name" value="Rohan" class="form-input host-input-sm">
+                </div>
+              </div>
+              <div class="form-group mb-0">
+                <label for="host1Voice" class="form-sublabel">Voice Profile</label>
+                <select id="host1Voice" name="host_1_voice" class="form-select">
+                  <option value="rohan" selected>Rohan (Dynamic, Clear)</option>
+                  <option value="rahul">Rahul (Approachable, Warm)</option>
+                  <option value="aayan">Aayan (Conversational)</option>
+                  <option value="ashutosh">Ashutosh (Authoritative)</option>
+                  <option value="shubh">Shubh (Radio Broadcaster)</option>
+                  <option value="aditya">Aditya (Crisp Professional)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Host 2 -->
+            <div class="host-card">
+              <div class="host-card-header">
+                <span class="host-avatar host-2-avatar">H2</span>
+                <div>
+                  <label class="host-card-label" for="host2Name">Host 2 (Expert)</label>
+                  <input type="text" id="host2Name" name="host_2_name" value="Priya" class="form-input host-input-sm">
+                </div>
+              </div>
+              <div class="form-group mb-0">
+                <label for="host2Voice" class="form-sublabel">Voice Profile</label>
+                <select id="host2Voice" name="host_2_voice" class="form-select">
+                  <option value="priya" selected>Priya (Insightful, Articulate)</option>
+                  <option value="simran">Simran (Lively, Engaging)</option>
+                  <option value="kavya">Kavya (Storytelling, Expressive)</option>
+                  <option value="roopa">Roopa (Warm Conversational)</option>
+                  <option value="ritu">Ritu (Bright, Enthusiastic)</option>
+                  <option value="shreya">Shreya (Natural)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Production Parameters -->
+          <div class="form-section-title">
+            <span>⚙️ Audio & Script Settings</span>
+          </div>
+
+          <div class="settings-row">
+            <div class="form-group">
+              <label for="languageSelect" class="form-label">Language</label>
+              <select id="languageSelect" name="language" class="form-select">
+                <option value="English" data-code="en-IN" selected>English (en-IN)</option>
+                <option value="Hindi" data-code="hi-IN">Hindi (hi-IN)</option>
+                <option value="Hinglish" data-code="en-IN">Hinglish (Conversational Mix)</option>
+                <option value="Tamil" data-code="ta-IN">Tamil (ta-IN)</option>
+                <option value="Telugu" data-code="te-IN">Telugu (te-IN)</option>
+                <option value="Bengali" data-code="bn-IN">Bengali (bn-IN)</option>
+              </select>
+              <input type="hidden" id="languageCodeInput" name="language_code" value="en-IN">
+            </div>
+
+            <div class="form-group">
+              <label for="turnsSelect" class="form-label">Episode Length</label>
+              <select id="turnsSelect" name="turns" class="form-select">
+                <option value="4">Quick Teaser (4 Turns ~45s)</option>
+                <option value="6" selected>Standard Episode (6 Turns ~1.2m)</option>
+                <option value="8">Full Segment (8 Turns ~1.8m)</option>
+                <option value="12">Deep Dive (12 Turns ~2.5m)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <div class="form-group">
+              <label for="bgmSelect" class="form-label">Background Music & Jingle</label>
+              <select id="bgmSelect" name="bgm_style" class="form-select">
+                <option value="lofi_ambient" selected>Lo-Fi Ambient (Warm chords & ducking)</option>
+                <option value="tech_upbeat">Tech Upbeat (Modern arpeggios & jingle)</option>
+                <option value="news_calm">Cinematic Calm (Deep broadcast pad)</option>
+                <option value="none">No Background Music (Dialogue Only)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="toneSelect" class="form-label">Tone & Style</label>
+              <select id="toneSelect" name="tone" class="form-select">
+                <option value="conversational, engaging, and lively" selected>Conversational & Fun</option>
+                <option value="analytical, deep technical breakdown, informative">Deep Tech & Analytical</option>
+                <option value="investigative, journalistic, questioning">Investigative Journalism</option>
+                <option value="humorous, casual, bantering">Casual & Bantering</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" id="btnGenerate" class="btn btn-primary btn-block btn-lg">
+            <span class="btn-text">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+              Generate Podcast Episode
+            </span>
+            <span class="btn-spinner hidden"></span>
+          </button>
+        </form>
+      </section>
+
+      <!-- Right Column: Live Production & Interactive Studio Player -->
+      <section class="studio-panel panel-player">
+        <div class="panel-header">
+          <h2 class="panel-title">Master Output</h2>
+          <span class="panel-pill" id="playerStatusPill">Ready</span>
+        </div>
+
+        <!-- Live Generation Progress Card -->
+        <div id="progressCard" class="progress-card hidden">
+          <div class="progress-header">
+            <div class="progress-status-icon">
+              <span class="spinner-ring"></span>
+            </div>
+            <div>
+              <h3 class="progress-title" id="progressTitle">Crafting Script with Sarvam-105B...</h3>
+              <p class="progress-subtitle" id="progressSubtitle">Analyzing topic dynamics and host personas</p>
+            </div>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progressBarFill" style="width: 25%;"></div>
+          </div>
+          <div class="progress-steps-list">
+            <div class="progress-step active" id="step1">
+              <span class="step-dot"></span>
+              <span>1. Research & Scriptwriting (Sarvam-105B)</span>
+            </div>
+            <div class="progress-step" id="step2">
+              <span class="step-dot"></span>
+              <span>2. Multi-Speaker Voice Synthesis (Bulbul v3)</span>
+            </div>
+            <div class="progress-step" id="step3">
+              <span class="step-dot"></span>
+              <span>3. Audio Mastering & Background Music Ducking</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Player & Transcript Container -->
+        <div id="playerContainer" class="player-container">
+          <!-- Episode Info Header -->
+          <div class="episode-info-card">
+            <div class="episode-meta-tags">
+              <span class="meta-tag" id="epLanguageTag">English</span>
+              <span class="meta-tag" id="epDurationTag">48s</span>
+              <span class="meta-tag" id="epBgmTag">Lo-Fi Ambient</span>
+            </div>
+            <h3 class="episode-title" id="epTitle">Why Indian Tech Startups are Booming</h3>
+            <p class="episode-hosts" id="epHosts">Featuring <strong>Rohan</strong> & <strong>Priya</strong></p>
+          </div>
+
+          <!-- Waveform Player Controls -->
+          <div class="audio-player-card">
+            <audio id="audioElement" preload="metadata"></audio>
+
+            <div class="player-timeline">
+              <span class="time-label" id="currentTimeLabel">0:00</span>
+              <input type="range" id="seekSlider" class="seek-slider" min="0" max="100" value="0">
+              <span class="time-label" id="totalDurationLabel">0:48</span>
+            </div>
+
+            <div class="player-controls-row">
+              <div class="speed-selector">
+                <button type="button" class="btn-chip active" id="btnSpeed1">1x</button>
+                <button type="button" class="btn-chip" id="btnSpeed125">1.25x</button>
+                <button type="button" class="btn-chip" id="btnSpeed15">1.5x</button>
+              </div>
+
+              <div class="playback-buttons">
+                <button type="button" class="btn-circle btn-sub" id="btnRewind10" title="Rewind 10s">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6"></path><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                </button>
+                <button type="button" class="btn-circle btn-play-main" id="btnPlayPause" title="Play">
+                  <svg id="playIcon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                  <svg id="pauseIcon" class="hidden" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                </button>
+                <button type="button" class="btn-circle btn-sub" id="btnForward10" title="Forward 10s">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                </button>
+              </div>
+
+              <div class="player-actions">
+                <a id="btnDownloadAudio" href="#" download="podcast_episode.wav" class="btn btn-secondary btn-sm" title="Download WAV">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  Download Audio
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Transcript Section -->
+          <div class="transcript-wrapper">
+            <div class="transcript-header">
+              <h4 class="transcript-title">Episode Transcript</h4>
+              <button type="button" class="btn-link" id="btnDownloadTranscript">Export .MD</button>
+            </div>
+            <div class="transcript-turns" id="transcriptTurnsList">
+              <!-- Dialogue turns will render here -->
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Slide-over Episode Library Drawer -->
+    <div id="libraryDrawer" class="library-drawer">
+      <div class="drawer-header">
+        <h3 class="drawer-title">Previous Episodes</h3>
+        <button type="button" class="btn-close" id="btnCloseLibrary">&times;</button>
+      </div>
+      <div class="drawer-body" id="libraryEpisodesList">
+        <p class="empty-state">Loading your studio recordings...</p>
+      </div>
+    </div>
+    <div id="drawerBackdrop" class="drawer-backdrop"></div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
