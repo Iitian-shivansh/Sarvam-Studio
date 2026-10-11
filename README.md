@@ -9,11 +9,14 @@
 
 ---
 
-## 🎬 Product Demo Video
+## 🎬 Product Demo Walkthrough
 
-https://github.com/Iitian-shivansh/Sarvam-Studio/raw/main/assets/demo.mp4
-
-> 📺 **Live Walkthrough:** Watch Sarvam Studio generate a complete multi-speaker podcast episode in real time — from topic/document ingestion and dialogue crafting to expressive voice synthesis (`bulbul:v3`), background music ducking, and synchronized playback.
+<div align="center">
+  <img src="assets/demo.gif" alt="Sarvam Studio Demo Walkthrough" width="100%" />
+  <p align="center">
+    📥 <a href="https://github.com/Iitian-shivansh/Sarvam-Studio/raw/main/assets/demo.mp4"><strong>Download Full HD Demo Video (.mp4)</strong></a> • 📺 <em>Watch Sarvam Studio generate a complete multi-speaker podcast episode in real time.</em>
+  </p>
+</div>
 
 ---
 
