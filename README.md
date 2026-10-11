@@ -9,6 +9,14 @@
 
 ---
 
+## 🎬 Product Demo Video
+
+https://github.com/Iitian-shivansh/Sarvam-Studio/raw/main/assets/demo.mp4
+
+> 📺 **Live Walkthrough:** Watch Sarvam Studio generate a complete multi-speaker podcast episode in real time — from topic/document ingestion and dialogue crafting to expressive voice synthesis (`bulbul:v3`), background music ducking, and synchronized playback.
+
+---
+
 ## 🌟 Key Features
 
 - **🧠 Autonomous Two-Host Scriptwriting (`sarvam-105b-conversations`)**  
